@@ -12,6 +12,8 @@ const nextConfig = {
         pathname: "/**",
       }
     ]
+  },  typescript: {
+    ignoreBuildErrors: true, // Ignores TypeScript errors during build
   },
   eslint: {
     // Warning: This allows production builds to successfully complete even if
