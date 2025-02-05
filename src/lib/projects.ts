@@ -2,7 +2,7 @@
 
 import { db } from "./db"; // Import Drizzle instance
 import { Project } from "./schema";
-
+import { eq } from "drizzle-orm";
 export async function createProject(data: {
   name: string;
   description?: string;
@@ -31,5 +31,14 @@ export async function getProjects() {
   } catch (error) {
     console.error("Error fetching projects:", error);
     return [];
+  }
+}
+export async function deleteProject(projectId: number) {
+  try {
+    await db.delete(Project).where(eq(Project.id, projectId));
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting project:", error);
+    return { error: (error as Error).message };
   }
 }

@@ -17,11 +17,7 @@ import {
   List,
   Timer,
 } from "lucide-react";
-import {
-  useGetProjectsQuery,
-  useDeleteProjectMutation,
-} from "@/state/api";
-import { getProjects } from "@/lib/projects";
+import { deleteProject, getProjects } from "@/lib/projects";
 import ModalNewProject from "@/app/projects/ModelNewProject";
 
 interface Project {
@@ -42,23 +38,35 @@ const Sidebar = () => {
     (state) => state.global.isSidebarCollapsed
   );
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const data = await getProjects();
-        setProjects(data);
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-      }
-    };
+  const fetchProjects = async () => {
+    try {
+      const data = await getProjects();
+      setProjects(data);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchProjects();
   }, []);
 
-  const handleProjectDelete = (projectId: number) => {
-    setProjects(currentProjects => 
-      currentProjects.filter(project => project.id !== projectId)
-    );
+  const handleProjectDelete = async (projectId: number) => {
+    if (window.confirm("Are you sure you want to delete this project?")) {
+      try {
+        const result = await deleteProject(projectId);
+        
+        if (result.success) {
+          setProjects(currentProjects => 
+            currentProjects.filter(project => project.id !== projectId)
+          );
+        } else {
+          console.error("Failed to delete project:", result.error);
+        }
+      } catch (error) {
+        console.error("Error deleting project:", error);
+      }
+    }
   };
 
   const sidebarClassNames = `fixed flex flex-col h-full justify-between shadow-xl transition-all duration-300 z-40 dark:bg-black bg-white ${
@@ -105,10 +113,6 @@ const Sidebar = () => {
           >
             <PlusSquare className="mr-2 h-5 w-5" /> New Boards
           </button>
-          <ModalNewProject
-            isOpen={isModalNewProjectOpen}
-            onClose={() => setIsModalNewProjectOpen(false)}
-          />
         </nav>
 
         {/* Projects Section */}
@@ -132,10 +136,15 @@ const Sidebar = () => {
               label={project.name}
               href={`/projects/${project.id}`}
               projectId={project.id}
-              onDelete={handleProjectDelete}
+              onDelete={() => handleProjectDelete(project.id)}
             />
           ))
         }
+
+        <ModalNewProject
+          isOpen={isModalNewProjectOpen}
+          onClose={() => setIsModalNewProjectOpen(false)}
+        />
       </div>
     </div>
   );
@@ -146,7 +155,7 @@ interface SidebarLinkProps {
   label: string;
   icon?: JSX.Element;
   projectId?: number;
-  onDelete?: (projectId: number) => void;
+  onDelete?: () => void;
 }
 
 const SidebarLink = ({
@@ -154,12 +163,16 @@ const SidebarLink = ({
   label,
   icon,
   projectId,
+  onDelete,
 }: SidebarLinkProps) => {
   const pathname = usePathname();
   const isActive = pathname === href;
-  const [isHidden, setIsHidden] = useState(false); // Manage hidden state
 
-  if (isHidden) return null; // Hide the project when isHidden is true
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent navigation
+    e.stopPropagation(); // Prevent event bubbling
+    onDelete?.();
+  };
 
   return (
     <Link href={href}>
@@ -178,7 +191,7 @@ const SidebarLink = ({
         </div>
         {projectId && !isActive && (
           <button
-            onClick={() => setIsHidden(true)} // Corrected the onClick handler
+            onClick={handleDeleteClick}
             className="text-gray-500 hover:text-red-500 transition-colors"
           >
             <Trash2 size={18} />
@@ -188,6 +201,5 @@ const SidebarLink = ({
     </Link>
   );
 };
-
 
 export default Sidebar;
