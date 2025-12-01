@@ -27,13 +27,6 @@ const ProjectHeader = ({ activeTab, setActiveTab }: Props) => {
                         setActiveTab={setActiveTab}
                         activeTab={activeTab}
                     />
-               
-                     <TabButton
-                        name="Table"
-                        icon={<Table className="h-5 w-5" />}
-                        setActiveTab={setActiveTab}
-                        activeTab={activeTab}
-                    />
                 </div>
                 <button
                 className="flex items-center rounded-md bg-blue-primary px-3 py-2 text-white hover:bg-blue-600"
