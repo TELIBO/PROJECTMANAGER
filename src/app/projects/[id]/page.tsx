@@ -27,10 +27,6 @@ const Project = ({ params }: Props) => {
            <Board id={id} setIsModalNewTaskOpen={setIsModelNewTaskOpen} />
             )
             }
-     
-                 /* {activeTab === "Table" && (
-        <Table id={id} setIsModalNewTaskOpen={setIsModelNewTaskOpen} />
-      )} */
         </div>
     );
 };
